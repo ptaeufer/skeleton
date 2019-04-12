@@ -1,0 +1,3 @@
+NSHealthUpdateUsageDescription = "we do not share any personal data!";
+NSHealthShareUsageDescription = "to execute this smoove we need access to your apple health data";
+NSPhotoLibraryUsageDescription = "to execute this smoove we need access to your photos";

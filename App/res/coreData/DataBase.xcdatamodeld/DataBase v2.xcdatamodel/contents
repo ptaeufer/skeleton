@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14460.32" systemVersion="18A391" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="AmountMO" representedClassName="AmountMO" syncable="YES" codeGenerationType="class">
+        <attribute name="amount" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="decimals" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="isCrypto" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="moneyMovementAmount" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MoneyMovementMO" inverseName="amount" inverseEntity="MoneyMovementMO" syncable="YES"/>
+        <relationship name="orderAmount" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="OrderMO" inverseName="amount" inverseEntity="OrderMO" syncable="YES"/>
+        <relationship name="orderTarget" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="OrderMO" inverseName="targetAmount" inverseEntity="OrderMO" syncable="YES"/>
+        <relationship name="transactionAmount" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TransactionMO" inverseName="amount" inverseEntity="TransactionMO" syncable="YES"/>
+        <relationship name="transactionFees" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TransactionMO" inverseName="fees" inverseEntity="TransactionMO" syncable="YES"/>
+    </entity>
+    <entity name="CreditCardMO" representedClassName="CreditCardMO" syncable="YES" codeGenerationType="class">
+        <attribute name="brand" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="expiryMonth" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="expiryYear" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="holder" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="last4Digits" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="ExchangeRateMO" representedClassName="ExchangeRateMO" syncable="YES" codeGenerationType="class">
+        <attribute name="eur" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="rates" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="usd" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+    </entity>
+    <entity name="ExecutionMO" representedClassName="ExecutionMO" syncable="YES" codeGenerationType="class">
+        <attribute name="amount" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="created_at" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="currency" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="execution_date" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="info" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="smoove_id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="wish_id" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="MoneyMovementMO" representedClassName="MoneyMovementMO" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="source" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="sourceIdentifier" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="userId" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="amount" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="AmountMO" inverseName="moneyMovementAmount" inverseEntity="AmountMO" syncable="YES"/>
+        <relationship name="crypto_config" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="PortfolioItemMO" inverseName="moneymovement" inverseEntity="PortfolioItemMO" syncable="YES"/>
+        <relationship name="transaction" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TransactionMO" inverseName="moneymovements" inverseEntity="TransactionMO" syncable="YES"/>
+    </entity>
+    <entity name="OrderMO" representedClassName="OrderMO" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="targetCurrency" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="amount" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="AmountMO" inverseName="orderAmount" inverseEntity="AmountMO" syncable="YES"/>
+        <relationship name="targetAmount" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="AmountMO" inverseName="orderTarget" inverseEntity="AmountMO" syncable="YES"/>
+        <relationship name="transaction" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TransactionMO" inverseName="orders" inverseEntity="TransactionMO" syncable="YES"/>
+    </entity>
+    <entity name="PortfolioItemMO" representedClassName="PortfolioItemMO" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="percentage" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="moneymovement" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MoneyMovementMO" inverseName="crypto_config" inverseEntity="MoneyMovementMO" syncable="YES"/>
+        <relationship name="potfolio" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PortfolioMO" inverseName="items" inverseEntity="PortfolioMO" syncable="YES"/>
+        <relationship name="wish" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="WishMO" inverseName="crypto_config" inverseEntity="WishMO" syncable="YES"/>
+    </entity>
+    <entity name="PortfolioMO" representedClassName="PortfolioMO" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="items" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="PortfolioItemMO" inverseName="potfolio" inverseEntity="PortfolioItemMO" syncable="YES"/>
+    </entity>
+    <entity name="SmooveMO" representedClassName="SmooveMO" syncable="YES" codeGenerationType="class">
+        <attribute name="created_at" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="info" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="paused" optional="YES" attributeType="Boolean" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="rule" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="wish_id" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="TanMO" representedClassName="TanMO" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="TransactionMO" representedClassName="TransactionMO" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="successful" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="amount" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="AmountMO" inverseName="transactionAmount" inverseEntity="AmountMO" syncable="YES"/>
+        <relationship name="fees" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="AmountMO" inverseName="transactionFees" inverseEntity="AmountMO" syncable="YES"/>
+        <relationship name="moneymovements" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="MoneyMovementMO" inverseName="transaction" inverseEntity="MoneyMovementMO" syncable="YES"/>
+        <relationship name="orders" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="OrderMO" inverseName="transaction" inverseEntity="OrderMO" syncable="YES"/>
+    </entity>
+    <entity name="UserMO" representedClassName=".UserMO" syncable="YES" codeGenerationType="class">
+        <attribute name="email" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="gcmToken" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" attributeType="String" syncable="YES"/>
+        <attribute name="loginStatusPrimitive" optional="YES" attributeType="Integer 64" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="pin" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="token" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="WishInfoMO" representedClassName="WishInfoMO" syncable="YES" codeGenerationType="class">
+        <attribute name="background" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="wish" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="WishMO" inverseName="info" inverseEntity="WishMO" syncable="YES"/>
+    </entity>
+    <entity name="WishMO" representedClassName="WishMO" syncable="YES" codeGenerationType="class">
+        <attribute name="currency" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="is_completed" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="is_crypto" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="is_default" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="is_deleted" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="target_balance" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="target_date" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="crypto_config" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="PortfolioItemMO" inverseName="wish" inverseEntity="PortfolioItemMO" syncable="YES"/>
+        <relationship name="info" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="WishInfoMO" inverseName="wish" inverseEntity="WishInfoMO" syncable="YES"/>
+    </entity>
+    <entity name="WishStateMO" representedClassName="WishStateMO" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="state" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="AmountMO" positionX="245.6484375" positionY="233.01171875" width="128" height="195"/>
+        <element name="CreditCardMO" positionX="-207" positionY="-144" width="128" height="135"/>
+        <element name="ExchangeRateMO" positionX="329.5703125" positionY="40.6796875" width="128" height="105"/>
+        <element name="ExecutionMO" positionX="299.98046875" positionY="-251.26171875" width="128" height="165"/>
+        <element name="MoneyMovementMO" positionX="422.859375" positionY="520.09765625" width="128" height="165"/>
+        <element name="OrderMO" positionX="5.0390625" positionY="339.0546875" width="128" height="135"/>
+        <element name="PortfolioItemMO" positionX="-241.78125" positionY="140.546875" width="128" height="135"/>
+        <element name="PortfolioMO" positionX="-80.3125" positionY="141.35546875" width="128" height="75"/>
+        <element name="SmooveMO" positionX="-45.4296875" positionY="-102.31640625" width="128" height="150"/>
+        <element name="TanMO" positionX="135.3984375" positionY="-253.66796875" width="128" height="60"/>
+        <element name="TransactionMO" positionX="475.1875" positionY="307.13671875" width="128" height="150"/>
+        <element name="UserMO" positionX="-44.13671875" positionY="-251.8515625" width="128" height="135"/>
+        <element name="WishInfoMO" positionX="-415.98828125" positionY="-295.7265625" width="128" height="90"/>
+        <element name="WishMO" positionX="-413.60546875" positionY="-95.5859375" width="128" height="210"/>
+        <element name="WishStateMO" positionX="-207" positionY="-144" width="128" height="75"/>
+    </elements>
+</model>
