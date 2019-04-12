@@ -424,16 +424,8 @@
 			isa = PBXGroup;
 			children = (
 				D0C4A7162260E8BF00209DB5 /* BaseViewController.swift */,
-				D0C4A7172260E8BF00209DB5 /* svd */,
 			);
 			path = screens;
-			sourceTree = "<group>";
-		};
-		D0C4A7172260E8BF00209DB5 /* svd */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = svd;
 			sourceTree = "<group>";
 		};
 		D0C4A7182260E8BF00209DB5 /* views */ = {
