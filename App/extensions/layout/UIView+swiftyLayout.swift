@@ -1,3 +1,4 @@
+
 import UIKit
 import Promises
 
@@ -125,8 +126,8 @@ extension UIView {
         return self
     }
     
-    @discardableResult func trailing(_ val : CGFloat, to : R.id? = nil) -> Self {
-        self._constraints.append(Constraint((.trailing, .equal, to?.rawValue, val)))
+    @discardableResult func trailing(_ val : CGFloat, to : R.id? = nil, relation : NSLayoutConstraint.Relation = .equal) -> Self {
+        self._constraints.append(Constraint((.trailing, relation, to?.rawValue, val)))
         return self
     }
     
@@ -182,13 +183,40 @@ extension UIView {
     }
 }
 
+
+
 extension UIView : Configuration {
-    
+
+    private struct InflatingOperation {
+        let views : [AnyObject]
+        let callback : (()->Void)?
+    }
     
     private struct AssociatedKeys {
         static var constraints = "constraints"
         static var id = "id"
+        static var userInfo = "userInfo"
         static var controllerView = "controllerView"
+        static var inflatingOperations = "inflatingOperations"
+        static var inflatingOperation = "inflatingOperation"
+    }
+    
+    private var _inflatingOperation : Promise<Bool>? {
+        get {
+            return (objc_getAssociatedObject(self, &AssociatedKeys.inflatingOperation) as? Promise<Bool>)
+        }
+        set(value) {
+            objc_setAssociatedObject(self,&AssociatedKeys.inflatingOperation,value,objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    private var _inflatingOps : [InflatingOperation] {
+        get {
+            return (objc_getAssociatedObject(self, &AssociatedKeys.inflatingOperations) as? [InflatingOperation]) ?? [InflatingOperation]()
+        }
+        set(value) {
+            objc_setAssociatedObject(self,&AssociatedKeys.inflatingOperations,value,objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
     }
     
     var controllerView : Bool {
@@ -203,7 +231,14 @@ extension UIView : Configuration {
         get { return objc_getAssociatedObject(self, &AssociatedKeys.id) as? R.id }
         set(value) {
             objc_setAssociatedObject(self,&AssociatedKeys.id,value,objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-            if let _id = value { self.id(_id) }
+            if let _id = value, id != _id { self.id(_id) }
+        }
+    }
+    
+    var userInfo : Any? {
+        get { return objc_getAssociatedObject(self, &AssociatedKeys.userInfo) }
+        set(value) {
+            objc_setAssociatedObject(self,&AssociatedKeys.userInfo,value,objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     
@@ -225,34 +260,46 @@ extension UIView : Configuration {
         return self.viewWithTag(id.rawValue.hash) as? T
     }
     
-    func inflate(_ layout : Layout, callback : (()->Void)? = nil) {
-        if let callback = callback {
-            all(self.subviews.map({ $0.animate().alpha(0).promise()})).then { _ in
-                self.inflate(layout.layout())
-                self.layoutIfNeeded()
-                self.subviews.forEach({$0.alpha = 0})
-                callback()
-                all(self.subviews.map({ $0.animate().alpha(1).promise()})).then{ _ in }
-            }
-        } else {
-            self.inflate(layout.layout())
+    private func processInflation() {
+        
+        func done() {
+            self._inflatingOps.removeFirst()
+            self._inflatingOperation = nil
+            processInflation()
         }
+        
+        if _inflatingOperation == nil {
+            if let op = self._inflatingOps.first {
+                _inflatingOperation = Promise<Bool>.pending()
+                if let callback = op.callback {
+                    all(self.subviews.map({ $0.animate().alpha(0).promise()})).then { _ in
+                        self.inflate(op.views)
+                        self.layoutIfNeeded()
+                        self.subviews.forEach({$0.alpha = 0})
+                        callback()
+                        all(self.subviews.map({ $0.animate().alpha(1).promise()})).then{_ in done()}
+                    }
+                } else {
+                    self.inflate(op.views)
+                    done()
+                }
+                
+            }
+        }
+    }
+    
+    func inflate(_ layout : Layout, callback : (()->Void)? = nil) {
+        _inflatingOps.append(InflatingOperation(views : layout.layout(), callback: callback))
+         processInflation()
+       
     }
     
     
     func inflate<T>(_ layout : Layout, _ obj : T, callback : (()->Void)? = nil) {
-        if let callback = callback {
-            all(self.subviews.map({ $0.animate().alpha(0).promise()})).then { _ in
-                self.inflate(layout.layout(Binding(obj)))
-                self.subviews.forEach({$0.alpha = 0})
-                callback()
-                all(self.subviews.map({ $0.animate().alpha(1).promise()})).then{ _ in }
-            }
-        } else {
-            self.inflate(layout.layout(Binding(obj)))
-        }
-        
+        _inflatingOps.append(InflatingOperation(views : layout.layout(Binding(obj)), callback: callback))
+        processInflation()
     }
+    
     
     private func inflate(_ views : [AnyObject]) {
         
@@ -290,7 +337,14 @@ extension UIView : Configuration {
     
     @discardableResult
     func id(_ id :R.id) -> Self {
+        self.id = id
         self.tag = id.rawValue.hash
+        return self
+    }
+    
+    @discardableResult
+    func accessibilityId(_ id: String) -> Self {
+        self.accessibilityIdentifier = id
         return self
     }
     
@@ -356,7 +410,7 @@ extension UIView : Configuration {
     }
 
     @discardableResult
-    func on(click : @escaping ()->Void) -> Self {
+    func on(click : @escaping (UIView)->Void) -> Self {
         UITapGestureRecognizer(addToView: self, closure: click)
         return self
     }
@@ -364,7 +418,7 @@ extension UIView : Configuration {
     @discardableResult
     func on(click : R.event) -> Self {
         self.isUserInteractionEnabled = true
-        UITapGestureRecognizer(addToView: self, closure: {
+        UITapGestureRecognizer(addToView: self, closure: { _ in
             self.notify(event: click)
         })
         return self
@@ -403,7 +457,7 @@ extension UIView : Configuration {
     }
     
     @discardableResult
-    func shadow(radius: CGFloat = 2.0, opacity: Float = 0.6, color: UIColor = .darkGray, offset: CGSize = CGSize(width: -2, height: 2)) -> Self {
+    func shadow(radius: CGFloat = 2.0, opacity: Float = 0.6, color: UIColor = R.color.colorDarkGrey.color, offset: CGSize = CGSize(width: -2, height: 2)) -> Self {
         self.layer.masksToBounds = false
         self.layer.shadowColor = color.cgColor
         self.layer.shadowOpacity = opacity
@@ -435,4 +489,20 @@ extension UIView {
             layer.removeAnimation(forKey: UIView.kRotationAnimationKey)
         }
     }
+}
+
+extension UIControl {
+    @discardableResult
+    func on(valueChanged event: R.event) -> Self {
+        self.addTarget(self, action: #selector(self.onChange(_:)), for: .valueChanged)
+        self.userInfo = event
+        return self
+    }
+    
+    @objc private func onChange(_ control: UIControl) {
+        if let event = control.userInfo as? R.event {
+            control.notify(event: event)
+        }
+    }
+    
 }

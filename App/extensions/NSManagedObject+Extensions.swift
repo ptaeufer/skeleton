@@ -1,3 +1,5 @@
+
+
 import Foundation
 import CoreData
 
@@ -59,25 +61,29 @@ extension NSManagedObject {
     
     private func extractPrimitiveValues(from object: NSManagedObject) -> [String: Any?] {
         var keyValues = [String: Any?]()
-        
-        for (key, _) in object.entity.attributesByName {
-            let value = object.value(forKey: key)
-            if let attribute = object.entity.attributesByName[key],
-                attribute.attributeType == .booleanAttributeType {
-                keyValues[key] = value as! Bool
-            } else if value is Int {
-                keyValues[key] = value as! Int
-            } else if value is Data {
-                keyValues[key] = NSKeyedUnarchiver.unarchiveObject(with: value as! Data)
-            }else if value is Date {
-                keyValues[key] = ISO8601DateFormatter().string(from: value as! Date)
-            }else if let attribute = object.entity.attributesByName[key],
-                attribute.attributeType == .stringAttributeType {
-                keyValues[key] = value ?? ""
-            } else  {
-                keyValues[key] = value
+        if object.entity.attributesByName.filter({ $0.key == "json" }).first != nil, let value = object.value(forKey: "json"), let json = NSKeyedUnarchiver.unarchiveObject(with: value as! Data) as? [String: Any?] {
+            keyValues = json
+        } else {
+            for (key, _) in object.entity.attributesByName {
+                let value = object.value(forKey: key)
+                if let attribute = object.entity.attributesByName[key],
+                    attribute.attributeType == .booleanAttributeType {
+                    keyValues[key] = (value == nil) ? false : value as! Bool
+                } else if value is Int {
+                    keyValues[key] = value as! Int
+                } else if value is Data {
+                    keyValues[key] = NSKeyedUnarchiver.unarchiveObject(with: value as! Data)
+                }else if value is Date {
+                    keyValues[key] = ISO8601DateFormatter().string(from: value as! Date)
+                }else if let attribute = object.entity.attributesByName[key],
+                    attribute.attributeType == .stringAttributeType {
+                    keyValues[key] = value ?? ""
+                } else  {
+                    keyValues[key] = value
+                }
             }
         }
+        
         return keyValues
     }
     

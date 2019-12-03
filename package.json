@@ -1,0 +1,10 @@
+{
+  "name": "app-ios-crypto",
+  "version": "1.0.0",
+  "dependencies": {
+    "bluebird": "*",
+    "lodash": "*",
+    "deep-diff": "*",
+    "deep-assign": "*"
+  }
+}

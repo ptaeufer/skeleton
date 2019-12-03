@@ -144,7 +144,7 @@ extension UITextField {
             }
             if let next = controller?.view.getView(next) {
                 next.becomeFirstResponder()
-                GestureTarget.existingTarget(inTargetView: next)?.containers.forEach({$0.closure()})
+                GestureTarget.existingTarget(inTargetView: next)?.containers.forEach({$0.closure(next)})
                 if let n = next as? UIButton {
                     n.sendActions(for: .touchUpInside)
                 }

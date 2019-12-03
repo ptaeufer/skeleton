@@ -3,13 +3,16 @@ import UIKit
 public protocol Configuration {}
 
 extension Configuration {
+    /*
     public func apply(_ block: (Self) -> Void) -> Self {
         block(self)
         return self
     }
-    
+    */
 }
 
+extension Dictionary where Iterator.Element == (key: String, value: Any) { func extend(_ ext : [String:Any]) -> Dictionary<String,Any> { return self.merging(ext) { (_, new) in new } } }
+class RawResource : NSObject {typealias Style = [String:Any]; }; @objcMembers class Resource : NSObject { typealias Style = [String:Any]; override init() {}}
 
 extension UITableView {
     
@@ -99,7 +102,7 @@ extension R.font {
 extension R.color {
     var color : UIColor {
         if let color : String = self.get() {
-            return UIColor(hex: color)
+            return UIColor(hex : color)
         }
         return UIColor(hex: self.rawValue)
     }
@@ -175,7 +178,8 @@ protocol EventListener {
     func on(event : R.event)
 }
 
-class Observable {
+class Observable  {
+    
     let _observers = NSPointerArray.weakObjects()
     func notify(_ event : R.event) {
         _observers.allObjects.each {  index,o  in
@@ -194,7 +198,7 @@ class Observable {
 
 extension UITapGestureRecognizer {
     @discardableResult convenience init(addToView targetView: UIView,
-                                        closure: @escaping () -> Void) {
+                                        closure: @escaping (UIView) -> Void) {
         self.init()
         
         GestureTarget.add(gesture: self,
@@ -206,9 +210,9 @@ extension UITapGestureRecognizer {
 class GestureTarget: UIView {
     class ClosureContainer {
         weak var gesture: UIGestureRecognizer?
-        let closure: (() -> Void)
+        let closure: ((UIView) -> Void)
         
-        init(closure: @escaping () -> Void) {
+        init(closure: @escaping (UIView) -> Void) {
             self.closure = closure
         }
     }
@@ -220,7 +224,7 @@ class GestureTarget: UIView {
         isHidden = true
     }
     
-    static func add(gesture: UIGestureRecognizer, closure: @escaping () -> Void,
+    static func add(gesture: UIGestureRecognizer, closure: @escaping (UIView) -> Void,
                     toView targetView: UIView) {
         let target: GestureTarget
         if let existingTarget = existingTarget(inTargetView: targetView) {
@@ -259,7 +263,7 @@ class GestureTarget: UIView {
             }
             
             if gesture === containerGesture {
-                container.closure()
+                container.closure(self)
             }
         }
     }

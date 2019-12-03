@@ -12,7 +12,7 @@ class Toast : UIView {
     
     init() {
         super.init(frame : .zero)
-        self.inflate(R.layout.ToastLayout)
+        self.inflate(R.layout.toastLayout)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -54,7 +54,7 @@ class Toast : UIView {
     func action(_ message : String, _ callback : @escaping ()->Void) -> Toast {
         self.action.alpha = 1
         self.action.text(message.uppercased())
-        self.action.on {
+        self.action.on { _ in
             self.dismiss()
             callback()
         }
